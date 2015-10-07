@@ -54,9 +54,9 @@ class BaseAsset(object):
   "that knows how to be iterated over, so we can say list(v1.Story)"
   __metaclass__ = IterableType
               
-  def __new__(Class, oid):
+  def __new__(Class, oid, moment=None):
     "Tries to get an instance out of the cache first, otherwise creates one"
-    cache_key = (Class._v1_asset_type_name, int(oid))
+    cache_key = (Class._v1_asset_type_name, oid, moment)
     cache = Class._v1_v1meta.global_cache
     self = cache.get(cache_key, None)
     if self is None:
@@ -85,7 +85,10 @@ class BaseAsset(object):
     
   @property
   def reprref(self):
-      return "{0}({1})".format(self._v1_asset_type_name, self._v1_oid)
+      if self._v1_moment:
+        return "{0}({1}:{2})".format(self._v1_asset_type_name, self._v1_oid, self._v1_moment)
+      else:
+        return "{0}({1})".format(self._v1_asset_type_name, self._v1_oid)
     
   @property
   def url(self):
@@ -175,11 +178,11 @@ class BaseAsset(object):
     
   def _v1_refresh(self):
     'Syncs the objects from current server data'
-    self._v1_current_data = self._v1_v1meta.read_asset(self._v1_asset_type_name, self._v1_oid)
+    self._v1_current_data = self._v1_v1meta.read_asset(self._v1_asset_type_name, self._v1_oid, self._v1_moment)
     self._v1_needs_refresh = False
     
   def _v1_get_single_attr(self, attr):
-    return self._v1_v1meta.get_attr(self._v1_asset_type_name, self._v1_oid, attr)
+    return self._v1_v1meta.get_attr(self._v1_asset_type_name, self._v1_oid, attr, self._v1_moment)
     
   def _v1_execute_operation(self, opname):
     result = self._v1_v1meta.execute_operation(self._v1_asset_type_name, self._v1_oid, opname)
