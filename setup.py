@@ -1,20 +1,14 @@
 from setuptools import setup
 
-installation_requirements = [
-    'elementtree',
-    'testtools',
-    'future',
-    'urllib'
+install_requires = [
+    'future'
 ]
 
 if (sys.version_info < (3,0)):
-    # Python3 combines urllib2 and urlparse into urllib
-    installation_requirements.append('urllib2')
-    installation_requirements.append('urlparse')
     # has a different name if supporting Python3
-    installation_requirements.append('python-ntlm')
+    install_requires.append('python-ntlm')
 else:
-    installation_requirements.append('python-ntlm3')
+    install_requires.append('python-ntlm3')
 
 setup(
   name = "v1pysdk",
@@ -31,6 +25,10 @@ setup(
     ],
   include_package_data=True,
   install_requires = installation_requirements,
+
+  tests_require = [
+      'testtools',
+  ],
 
   test_suite = "v1pysdk.tests",
 
