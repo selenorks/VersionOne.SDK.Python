@@ -17,8 +17,8 @@ else:
     installation_requirements.append('python-ntlm3')
 
 setup(
-  name = "v1pysdk-unofficial",
-  version = "0.4.post4",
+  name = "v1pysdk",
+  version = "0.5",
   description = "VersionOne API client",
   author = "Joe Koberg (VersionOne, Inc.)",
   author_email = "Joe.Koberg@versionone.com",
