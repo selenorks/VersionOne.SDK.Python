@@ -5,7 +5,7 @@ import sys
 if (sys.version_info < (3,0)):
     #Python2 way of doing this
     import urllib2 as theUrlLib  #must be a name matching the Python3 urllib.request
-    from urllib2 import Request, urlopen, HTTPBasicAuthHandler, HTTPCookieProcessor
+    from urllib2 import Request, urlopen, HTTPError, HTTPBasicAuthHandler, HTTPCookieProcessor
     from urllib import urlencode
     from urlparse import urlunparse,urlparse
 else:

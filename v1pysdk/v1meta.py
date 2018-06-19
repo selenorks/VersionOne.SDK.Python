@@ -124,8 +124,8 @@ class V1Meta(object):
         if ((sys.version_info >= (3,0)) and not isinstance(newvalue, str)) or ((sys.version_info < (3,0)) and isinstance(newvalue, unicode)):
             node.text = str(newvalue).decode('utf-8')
         else:
-            node.text = newvalue
-        update_doc.append(node)
+            node.text = str(newvalue)
+      update_doc.append(node)
     return update_doc
     
   def create_asset(self, asset_type_name, newdata):
@@ -141,8 +141,8 @@ class V1Meta(object):
   def execute_operation(self, asset_type_name, oid, opname):
     return self.server.execute_operation(asset_type_name, oid, opname)
     
-  def get_attr(self, asset_type_name, oid, attrname, moment=None):
-    xml = self.server.get_attr(asset_type_name, oid, attrname, moment)
+  def get_attr(self, asset_type_name, oid, attrname):
+    xml = self.server.get_attr(asset_type_name, oid, attrname)
     dummy_asset = ElementTree.Element('Asset')
     dummy_asset.append(xml)
     return self.unpack_asset(dummy_asset)[attrname]
@@ -150,8 +150,8 @@ class V1Meta(object):
   def query(self, asset_type_name, wherestring, selstring):
     return self.server.get_query_xml(asset_type_name, wherestring, selstring)
     
-  def read_asset(self, asset_type_name, asset_oid, moment=None):
-    xml = self.server.get_asset_xml(asset_type_name, asset_oid, moment)
+  def read_asset(self, asset_type_name, asset_oid):
+    xml = self.server.get_asset_xml(asset_type_name, asset_oid)
     return self.unpack_asset(xml)
     
   def unpack_asset(self, xml):
@@ -242,10 +242,9 @@ class V1Meta(object):
       return None
   
   def asset_from_oid(self, oidtoken):
-    oid_parts = oidtoken.split(":")
-    (asset_type, asset_id, moment) = oid_parts if len(oid_parts)>2 else (oid_parts[0], oid_parts[1], None)
+    asset_type, asset_id = oidtoken.split(':')[:2]
     AssetClass = self.asset_class(asset_type)
-    instance = AssetClass(asset_id, moment)
+    instance = AssetClass(asset_id)
     return instance
     
   def set_attachment_blob(self, attachment, data=None):

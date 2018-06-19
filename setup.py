@@ -66,13 +66,3 @@ setup(
   test_suite = "v1pysdk.tests",
 
 )
-
-
-
-
-
->>>>>>> updated setup.py and package __init__ to support PyPi upload
-
-  test_suite = "v1pysdk.tests",
-
-)
