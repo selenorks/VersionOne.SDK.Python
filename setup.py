@@ -39,7 +39,7 @@ setup(
     'v1pysdk',
     ],
   include_package_data=True,
-  install_requires = installation_requirements,
+  install_requires = install_requires,
 
   classifiers=(
       "Development Status :: 4 - Beta",
@@ -56,8 +56,6 @@ setup(
 
   # it may work on others, but this is what has had basic testing
   python_requires='>=2.5, <4',
-
-  install_requires = install_requires,
 
   tests_require = [
       'testtools'
