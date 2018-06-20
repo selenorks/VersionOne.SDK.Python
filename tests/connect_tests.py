@@ -1,8 +1,8 @@
-import sys
-
 from testtools import TestCase
 from testtools.matchers import Equals
+from testtools.content import text_content
 
+# try the old version, then fallback to the new one
 try:
     from xml.etree import ElementTree
     from xml.etree.ElementTree import parse, fromstring, Element
@@ -22,13 +22,14 @@ class TestV1Connection(TestCase):
         address = PublicTestServerConnection.address
     if not instance:
         instance = PublicTestServerConnection.instance
-    print("")
-    print("Using Server: " + address + "/" + instance + ", User=" + username)
-    
+    self.addDetail('URL', text_content(address + "/" + instance))
+    self.addDetail('username', text_content(username))
+
     server = V1Server(address=address, username=username, password=password,instance=instance)
     # The story names, but limit to only the first result so we don't get inundated with results
     code, body = server.fetch('/rest-1.v1/Data/Story?sel=Name&page=1,0')
-    print("\n\nCode: ", code)
-    print("Body: ", body)
+    self.addDetail('Code', text_content(str(code)))
+    self.addDetail('Body', text_content(str(body)))
+
     elem = fromstring(body)
     self.assertThat(elem.tag, Equals('Assets'))

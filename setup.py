@@ -58,9 +58,8 @@ setup(
   python_requires='>=2.5, <4',
 
   tests_require = [
-      'testtools'
+      'testtools',
+      'unittest2' # so testtools tests are auto-discovered
   ],
-
-  test_suite = "v1pysdk.tests",
-
+  test_suite = "tests",
 )
