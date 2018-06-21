@@ -64,7 +64,7 @@ class V1AssetNotFoundError(V1Error):
 class V1Server(object):
   "Accesses a V1 HTTP server as a client of the XML API protocol"
 
-  def __init__(self, address="localhost", instance="VersionOne.Web", username='', password='', scheme="http", instance_url=None, logparent=None, loglevel=logging.ERROR, use_password_as_token=False):
+  def __init__(self, address="localhost", instance="VersionOne.Web", username='', password='', scheme="https", instance_url=None, logparent=None, loglevel=logging.ERROR, use_password_as_token=False):
     if instance_url:
       self.instance_url = instance_url
       parsed = urlparse(instance_url)
