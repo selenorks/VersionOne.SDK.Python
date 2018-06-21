@@ -18,6 +18,53 @@ The source code for the VersionOne Python SDK is free and open-source, and we en
 
 ## Overview
 
+### Instantiating a connection
+
+To interact, you must first create an instance of the `V1Meta` object.  This requires you to specify how to connect to the server.
+
+There are two options, specifying the full URL to your instance directly, or specifying individual details.
+
+```python
+from v1pysdk import V1Meta
+
+with V1Meta(
+  instance_url = 'http://localhost/VersionOne',
+  # any instance, scheme, or address values will be ignored
+  username = 'admin',
+  password = 'admin'
+  ) as v1:
+```
+
+Alternatively
+
+```python
+from v1pysdk import V1Meta
+
+with V1Meta(
+  address = 'localhost',
+  instance = 'VersionOne',
+  scheme = 'http', #optional, defaults to https
+  username = 'admin',
+  password = 'admin'
+  ) as v1:
+```
+
+To authenticate, two methods are provided, username and password as demonstrated above, or Access Tokens.
+Tokens are created by logging in to VersionOne via the web interface, going to the user's profile, going to Applications, and creating a new application.  This will provide an Access Token that looks something like `1.2cFHe7NkoO1kOV/x8WLpw1NasJg=`.  KEEP THIS SECRET since it's the secret API access key for your specific user on your instance.
+
+To use an access token, you use it as your password and set the flag indicating it's really an Access Token.  This will no longer require a username to be present.
+
+```python
+from v1pysdk import V1Meta
+
+with V1Meta(
+  address = 'localhost',
+  instance = 'VersionOne',
+  password = '1.2cFHe7NkoO1kOV/x8WLpw1NasJg=',
+  use_password_as_token=True,
+  ) as v1:
+```
+
 ### Dynamic reflection of all V1 asset types:
 
   Just instantiate a V1Meta.  All asset types defined on the server are available
