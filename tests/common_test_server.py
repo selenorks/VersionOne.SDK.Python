@@ -13,7 +13,10 @@ class PublicTestServerConnection():
     password = 'admin'
     address = 'www14.v1host.com'
     instance = 'v1sdktesting'
-    #TODO: Add OAuth key
+    scheme = 'https'
+    # must match scheme + "://" + address + "/" + instance
+    instance_url = 'https://www14.v1host.com/v1sdktesting'
+    token = '1.VdeWXQVNdY0yVpYexTtznCxcWTQ='
 
     def __init__():
         pass
@@ -27,7 +30,9 @@ class PublicTestServerConnection():
             return None
         else:
             return v1pysdk.V1Meta(
-                instance_url = 'https://' + PublicTestServerConnection.address + '/' + PublicTestServerConnection.instance,
+                address = PublicTestServerConnection.address,
+                instance = PublicTestServerConnection.instance,
+                scheme = 'https',
                 username = PublicTestServerConnection.username,
                 password = PublicTestServerConnection.password,
             )
