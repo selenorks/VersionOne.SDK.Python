@@ -1,7 +1,7 @@
 # VersionOne Python SDK #
 
 _Officially distributed via PyPi (pip) as: __v1pysdk___<br>
-_An older version of this package, which follows flows with this version numbering, was distributed as 'v1pysdk-unoffical'_
+_An older version of this package, which flows with this version numbering, was distributed as 'v1pysdk-unoffical'_
 
 The VersionOne Python SDK is an open-source and community supported client for the VersionOne API.
 
@@ -10,7 +10,7 @@ As an open-sourced and community supported project, the VersionOne Python SDK is
 That said, there are a number of options for getting your questions addressed:
 
 * [StackOverflow](http://stackoverflow.com/questions/tagged/versionone): For asking questions of the VersionOne Development Community.
-* [GitHub Issues](https://github.com/versionone/VersionOne.SDK.Python/issues): For submitting issues that others may try to address.
+* [GitHub Issues](https://github.com/mtalexan/VersionOne.SDK.Python/issues): For submitting issues that others may try to address.
 
 In general, StackOverflow is your best option for getting support for the VersionOne Python SDK.
 
