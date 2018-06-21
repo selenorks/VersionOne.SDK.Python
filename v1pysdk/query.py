@@ -251,7 +251,7 @@ class V1Query(object):
     return self
 
   def find(self, text=None, field=None):
-    """A very slow and inefficient search method run on the server size to search for text fields containing
+    """A very slow and inefficient search method run on the server side to search for text fields containing
     matches to the search text.
     Must specify a field to search on that matches one of the defined field names or the entire search 
     is ignored.
