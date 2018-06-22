@@ -121,10 +121,7 @@ class V1Meta(object):
         node = Element('Attribute')
         node.set('name', attrname)
         node.set('act', 'set')
-        if ((sys.version_info >= (3,0)) and not isinstance(newvalue, str)) or ((sys.version_info < (3,0)) and isinstance(newvalue, unicode)):
-            node.text = str(newvalue).decode('utf-8')
-        else:
-            node.text = str(newvalue)
+        node.text = str(newvalue)
       update_doc.append(node)
     return update_doc
     
