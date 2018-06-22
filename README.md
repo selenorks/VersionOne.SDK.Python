@@ -497,12 +497,6 @@ with V1Meta(
 
   * Beef up test coverage
 
-    * Need to mock up server
-
-  * Examples
-
-    * provide an actual integration example
-
   * Asset creation templates and creation "in context of" other asset
 
   * Correctly handle multi-valued attributes including removal of values.
@@ -513,6 +507,8 @@ run `python setup.py install`, or just copy the v1pysdk folder into your PYTHONP
 
 
 ## Revision History
+
+2018-06-21 v0.6.1 - Fix a new item creation bug and added unittests for creation
 
 2018-06-21 v0.6 - Rebased to include some historical changes that were lost between 0.4 and 0.5.
 
