@@ -182,7 +182,7 @@ class V1Server(object):
       if exception.code == 404:
         raise V1AssetNotFoundError(exception)
       elif exception.code == 400:
-        raise V1Error('\n'+body)
+        raise V1Error('\n'+str(body))
       else:
         raise V1Error(exception)
     return document
