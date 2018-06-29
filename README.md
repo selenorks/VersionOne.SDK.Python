@@ -370,7 +370,12 @@ with V1Meta(
       story = v1.Story.where(Name='Super Cool Feature do over').first()
       story.Name = 'Super Cool Feature Redux'
       story.Owners = v1.Member.where(Name='Joe Koberg')      
-      v1.commit()  # flushes all pending updates to the server
+      errors = v1.commit()  # flushes all pending updates to the server
+      if not errors:
+          print("Successfully committed!")
+      else:
+          for e in errors:
+              raise e 
 ```
 
   The V1Meta object also serves as a context manager which will commit dirty object on exit.
@@ -507,6 +512,16 @@ run `python setup.py install`, or just copy the v1pysdk folder into your PYTHONP
 
 
 ## Revision History
+
+2018-06-28 v0.6.2 - Fix a critical memoization bug.  Fix a bug in error reponse printing.
+
+  A critical memoization bug caused by the python decorator being used prevents the same field of more than
+  one item of the same type from being updated in a single invocation of the Python intepreter; i.e. it's
+  only possible to update the Title of one Story within a Python script, regardless of how many V1Meta objects
+  are created.
+
+  Bug in how HTTP 400 responses were handled caused an exception to be thrown during handling and raising of
+  an exception, preventing the actual error response provided with the HTTP 400 from being printed.
 
 2018-06-21 v0.6.1 - Fix a new item creation bug and added unittests for creation
 
