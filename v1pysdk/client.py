@@ -103,7 +103,11 @@ class V1Server(object):
     return response
 
   def http_post(self, url, data=''):
-    request = Request(url, data)
+    encodedData=data
+    #encode to byte data as is needed if  it's a string
+    if isinstance(data, str):
+        encodedData=data.encode('utf-8')
+    request = Request(url, encodedData)
     request.add_header("Content-Type", "text/xml;charset=UTF-8")
     response = self.opener.open(request)
     return response
