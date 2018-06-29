@@ -16,7 +16,7 @@ class V1Meta(object):
   def __init__(self, *args, **kw):
     self.server = V1Server(*args, **kw)
     self.global_cache = {}
-g    self.dirtylist = []
+    self.dirtylist = []
     self.memoize_cache = {}
     
   def __getattr__(self, attr):
