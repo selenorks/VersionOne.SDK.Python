@@ -5,8 +5,9 @@ from testtools.matchers import GreaterThan, LessThan, Contains, StartsWith, Ends
 
 import v1pysdk
 from .common_test_server import PublicTestServerConnection
+from .common_test_setup import TestV1CommonSetup
 
-class TestV1Query(TestCase):
+class TestV1Query(TestV1CommonSetup):
     def test_select_story_as_generic_asset(self):
         """Queries up to 5 story assets"""
         with PublicTestServerConnection.getV1Meta() as v1:
@@ -157,63 +158,38 @@ class TestV1Query(TestCase):
 
             self.assertFalse(exceptionReached)
 
-# This should work, but doesn't for some reason.  It doesn't find any results from the find command
-#    def test_find_query(self):
-#        """Queries for the first story, then does a server-side find on a portion of the name to see if 
-#           any results are returned.
-#        """
-#        searchName=""
-#        exceptionReached=False
-#        with PublicTestServerConnection.getV1Meta() as v1:
-#            item = None
-#            size = 0
-#            name = ""
-#            items = None
-#            try:
-#                items = v1.Story.select('Name').page(size=40)
-#                item = items.first() #triggers actual query to happen
-#                size = len(items)
-#            except:
-#                self.skipTest("Unable to query for a Story object -- Story query test should have failed")
-#                return
-#            else:
-#                if size <= 0:
-#                    self.skipTest("Test Server contains no Stories")
-#                    return
-#
-#            for i in items:
-#                if len(i.Name) >= 2:
-#                    name = i.Name
-#                    self.addDetail('item-name', text_content(name))
-#                    break
-#
-#            if len(name) < 2:
-#                self.skipTest("Test Server contains too many single character named stories")
-#                return
-#
-#            # make a search term that's just one character shorter
-#            searchName = name[:-1]
-#            self.addDetail('search-name', text_content(searchName))
-#
-#        with PublicTestServerConnection.getV1Meta() as v1:
-#            findItems = None
-#            findItem = None
-#            size = 0
-#            firstName = ""
-#            try:
-#                findItems = v1.Story.select('Name').find(text=searchName, field='Name')
-#                findItem = findItems.first() #actually run the query
-#                size = len(findItems)
-#                firstName = findItem.Name
-#            except Exception as e:
-#                raise e
-#                #exceptions here are almost always because the query failed to work right
-#                exceptionReached=True
-#            else:
-#                # at the very least we should have found the one we based the search string on
-#                self.assertThat(size, GreaterThan(0))
-#                # results need to contain the string we searched for
-#                self.assertThat(firstName, Contains(searchName))
-#
-#            self.assertFalse(exceptionReached)
-#
+    def test_find_query(self):
+        """Creates a story, then does a find to see if it can be located by a partial name from a separate
+           connection instance.
+        """
+        searchName=""
+        exceptionReached=False
+        with PublicTestServerConnection.getV1Meta() as v1create:
+            createdStory = self._create_story(v1create)
+
+            # make a search term that's just one character shorter
+            searchName = createdStory.Name[:-1]
+            self.addDetail('search-name', text_content(searchName))
+
+        with PublicTestServerConnection.getV1Meta() as v1find:
+            findItems = None
+            findItem = None
+            size = 0
+            firstName = ""
+            try:
+                findItems = v1find.Story.select('Name').find(text=searchName, field='Name')
+                findItem = findItems.first() #actually run the query
+                size = len(findItems)
+                firstName = findItem.Name
+            except Exception as e:
+                raise e
+                #exceptions here are almost always because the query failed to work right
+                exceptionReached=True
+            else:
+                # at the very least we should have found the one we based the search string on
+                self.assertThat(size, GreaterThan(0))
+                # results need to contain the string we searched for
+                self.assertThat(firstName, Contains(searchName))
+
+            self.assertFalse(exceptionReached)
+

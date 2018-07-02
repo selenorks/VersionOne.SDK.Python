@@ -2,6 +2,11 @@ from testtools import TestCase
 from testtools.assertions import assert_that
 from testtools.matchers import Equals
 from testtools.content import text_content
+import sys
+if sys.version_info >= (3,0):
+    from urllib.error import HTTPError
+else:
+    from urllib2 import HTTPError
 
 # try the old version, then fallback to the new one
 try:
@@ -143,3 +148,102 @@ class TestV1Connection(TestCase):
             items.first() #run the query
         except Exception as e:
             assert_that(False, Equals(True), message="Error running query from connection: " + str(e))
+
+
+    def test_connect_fails_when_invalid(self):
+        v1bad = None
+        username = self.getUniqueString() #garbage
+        password = self.getUniqueString() #garbage
+        self.addDetail('address', text_content(PublicTestServerConnection.address))
+        self.addDetail('instance', text_content(PublicTestServerConnection.instance))
+        self.addDetail('bad-username', text_content(username))
+        self.addDetail('bad-password', text_content(password))
+
+        try:
+            v1bad = V1Meta(
+                instance_url = PublicTestServerConnection.instance_url,
+                username = username,
+                password = password,
+                use_password_as_token=False,
+                )
+            # we have to try to use it to get it to connect and fail
+            items = v1bad.Story.select('Name').page(size=1)
+            items.first() #run the query
+        except HTTPError as e:
+            assert_that(e.code, Equals(401), message="Connection failed for reasons other than authorization")
+        else:
+            assert_that(False, Equals(True), message="Connection succeeded with bad credentials")
+
+    def test_reconnect_succeeds_after_invalid(self):
+        v1bad = None
+        username = self.getUniqueString() #garbage
+        password = self.getUniqueString() #garbage
+        self.addDetail('bad-username', text_content(username))
+        self.addDetail('bad-password', text_content(password))
+
+        try:
+            v1bad = V1Meta(
+                instance_url = PublicTestServerConnection.instance_url,
+                username = username,
+                password = password,
+                use_password_as_token=False,
+                )
+            items = v1bad.Story.select('Name').page(size=1)
+            items.first() #run the query
+        except HTTPError as e:
+            assert_that(e.code, Equals(401), message="Connection failed for reasons other than authorization")
+        else:
+            assert_that(False, Equals(True), message="First connection succeeded with bad credentials, cannot continue test")
+
+        v1good = None
+        self.addDetail('address', text_content(PublicTestServerConnection.address))
+        self.addDetail('instance', text_content(PublicTestServerConnection.instance))
+
+        # Connect correctly first
+        try:
+            v1good = V1Meta(
+                instance_url = PublicTestServerConnection.instance_url,
+                password = PublicTestServerConnection.token,
+                use_password_as_token=True,
+                )
+            items = v1good.Story.select('Name').page(size=1)
+            items.first() #run the query
+        except Exception as e:
+            assert_that(False, Equals(True), message="Error running query from good connection: " + str(e))
+
+    def test_reconnect_fails_when_invalid(self):
+        v1good = None
+        self.addDetail('address', text_content(PublicTestServerConnection.address))
+        self.addDetail('instance', text_content(PublicTestServerConnection.instance))
+
+        # Connect correctly first
+        try:
+            v1good = V1Meta(
+                instance_url = PublicTestServerConnection.instance_url,
+                password = PublicTestServerConnection.token,
+                use_password_as_token=True,
+                )
+            items = v1good.Story.select('Name').page(size=1)
+            items.first() #run the query
+        except Exception as e:
+            assert_that(False, Equals(True), message="Error running query from good connection, cannot perform test: " + str(e))
+
+        v1bad = None
+        username = self.getUniqueString() #garbage
+        password = self.getUniqueString() #garbage
+        self.addDetail('bad-username', text_content(username))
+        self.addDetail('bad-password', text_content(password))
+
+        try:
+            v1bad = V1Meta(
+                instance_url = PublicTestServerConnection.instance_url,
+                username = username,
+                password = password,
+                use_password_as_token=False,
+                )
+            items = v1bad.Story.select('Name').page(size=1)
+            items.first() #run the query
+        except HTTPError as e:
+            assert_that(e.code, Equals(401), message="Connection failed for reasons other than authorization")
+        else:
+            assert_that(False, Equals(True), message="Second connection succeeded with bad credentials")

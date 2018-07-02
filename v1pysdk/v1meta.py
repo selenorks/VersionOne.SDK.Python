@@ -12,37 +12,34 @@ from .special_class_methods import special_classes
 from .none_deref import NoneDeref
 from .string_utils import split_attribute
 
-class V1Meta(object):        
+class V1Meta(object):
   def __init__(self, *args, **kw):
     self.server = V1Server(*args, **kw)
     self.global_cache = {}
     self.dirtylist = []
-    self.memoize_cache = {}
-    
+    self._memoized_data = {}
+
   def __getattr__(self, attr):
     "Dynamically build asset type classes when someone tries to get attrs "
     "that we don't have."
     return self.asset_class(attr)
-    
+
   def __enter__(self):
     return self
-  
-  def __exit__(self, *args, **kw):
-    self.commit()
-    
-  # The @memoized decorator cannot be used here.  If it is, Python will memoize the input arguments against
-  # the return values for all instances of this class that ever exist within the Python shell instantiation.
-  # This doesn't account for the fact that different instances of V1Meta may have different underlying data
-  # returned from the query and the return from this function should therefore be different given the same
-  # arguments for different instances of V1Meta.
-  def asset_class(self, asset_type_name):
-    # per-instance memoization
-    if asset_type_name in self.memoize_cache:
-        return self.memoize_cache[asset_type_name]
 
+  def __exit__(self, *args, **kw):
+    self.clear_memoized_cache()
+    self.commit()
+
+  def clear_memoized_cache(self):
+      """Clears the memoization cache produced by the @memoized decorator"""
+      self._memoized_data={}
+
+  @memoized # from .cache_decorator
+  def asset_class(self, asset_type_name):
     xmldata = self.server.get_meta_xml(asset_type_name)
     class_members = {
-        '_v1_v1meta': self, 
+        '_v1_v1meta': self,
         '_v1_asset_type_name': asset_type_name,
         }
     for operation in xmldata.findall('Operation'):
@@ -79,35 +76,32 @@ class V1Meta(object):
             return self._v1_setattr(attr, value)
           def deleter(self, attr=attr):
             raise NotImplementedError
-            
+
       class_members[attr] = property(getter, setter, deleter)
-      
+
     bases = [BaseAsset,]
     # mix in any special methods
     if asset_type_name in special_classes:
       mixin = special_classes[asset_type_name]
       bases.append(mixin)
-      
-    new_asset_class = type(asset_type_name, tuple(bases), class_members)
 
-    # save to our memoization cache
-    self.memoize_cache[asset_type_name] = new_asset_class
+    new_asset_class = type(asset_type_name, tuple(bases), class_members)
     return new_asset_class
-    
+
   def add_to_dirty_list(self, asset_instance):
     # at some point we're going to flush the items in the dirty list.  Since there
     # are a few triggers to do this, it's best to clear our memoization cache for
     # query responses as soon as we have something that can get flushed rather than
     # waiting for it to actually be flushed
-    self.memoize_cache = {}
+    self.clear_memoized_cache()
     self.dirtylist.append(asset_instance)
-    
+
   def commit(self):
       errors = []
       # we're flushing changes, make sure our memoization cache is cleared so the updates
       # are re-queried
       if self.dirtylist:
-          self.memoize_cache = {}
+          self.clear_memoized_cache()
       for asset in self.dirtylist:
           try:
               asset._v1_commit()
@@ -115,7 +109,7 @@ class V1Meta(object):
               errors.append(e)
           self.dirtylist = []
       return errors
-    
+
   def generate_update_doc(self, newdata):
     update_doc = Element('Asset')
     for attrname, newvalue in newdata.items():
@@ -145,13 +139,13 @@ class V1Meta(object):
         node.text = str(newvalue)
       update_doc.append(node)
     return update_doc
-    
+
   def create_asset(self, asset_type_name, newdata):
     update_doc = self.generate_update_doc(newdata)
     new_asset_xml = self.server.create_asset(asset_type_name,  update_doc)
     asset_type, asset_oid, asset_moment = new_asset_xml.get('id').split(':')
     return self.asset_class(asset_type)(asset_oid)
-    
+
   def update_asset(self, asset_type_name, asset_oid, newdata):
     update_doc = self.generate_update_doc(newdata)
     return self.server.update_asset(asset_type_name, asset_oid, update_doc)

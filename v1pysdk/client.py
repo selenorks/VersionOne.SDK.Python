@@ -24,7 +24,7 @@ except ImportError:
     from elementtree import ElementTree
     from elementtree.ElementTree import Element
 
-AUTH_HANDLERS = [HTTPBasicAuthHandler]
+NTLM_FOUND=False
 
 try:
     if (sys.version_info < (3,0)):
@@ -34,23 +34,29 @@ try:
 except ImportError:
     logging.warn("Windows integrated authentication module (ntlm) not found.")
 else:
+    NTLM_FOUND=True
     class CustomHTTPNtlmAuthHandler(HTTPNtlmAuthHandler):
-        """ A version of HTTPNtlmAuthHandler that handles errors (better).
-
-            The default version doesn't use `self.parent.open` in it's
-            error handler, and completely bypasses the normal `OpenerDirector`
-            call chain, most importantly `HTTPErrorProcessor.http_response`,
-            which normally raises an error for 'bad' http status codes..
-        """
-        def http_error_401(self, req, fp, code, msg, hdrs):
-            response = HTTPNtlmAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
-            if not (200 <= response.code < 300):
-                response = self.parent.error(
-                        'http', req, response, response.code, response.msg,
-                        response.info)
-            return response
-
-    AUTH_HANDLERS.append(CustomHTTPNtlmAuthHandler)
+	    # The following code was a recommended change to the existing.  However unittesting proves that it
+	    # and the existing obscure authentication failures.  There seems to be no actual reason to be doing
+	    # this unless there was a particular issue with the HTTPNtlmAuthHandler in some specific version of
+	    # urllib2 for Python2 that no longer exists.  Using the default handler provably works correctly
+	    pass
+        #""" A version of HTTPNtlmAuthHandler that handles errors (better).
+        #    The default version doesn't use `self.parent.open` in it's
+        #    error handler, and completely bypasses the normal `OpenerDirector`
+        #    call chain, most importantly `HTTPErrorProcessor.http_response`,
+        #    which normally raises an error for 'bad' http status codes..
+        #"""
+        #def http_error_401(self, req, fp, code, msg, hdrs):
+        #    response = HTTPNtlmAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
+        #    if not (200 <= response.code < 300):
+        #        if response.code == 401:
+        #            raise HTTPError(req.get_full_url(), response.code, response.msg, response.info(), fp)
+        #        else:
+        #            response = self.parent.error(
+        #                'http', req, response, response.code, response.msg,
+        #                response.info())
+        #    return response
 
 
 class V1Error(Exception):
@@ -76,7 +82,9 @@ class V1Server(object):
       self.instance = instance.strip('/')
       self.scheme = scheme
       self.instance_url = self.build_url('')
-
+    self.AUTH_HANDLERS = [HTTPBasicAuthHandler]
+    if NTLM_FOUND:
+        self.AUTH_HANDLERS.append(CustomHTTPNtlmAuthHandler)
     modulelogname='v1pysdk.client'
     logname = "%s.%s" % (logparent, modulelogname) if logparent else None
     self.logger = logging.getLogger(logname)
@@ -89,8 +97,8 @@ class V1Server(object):
   def _install_opener(self):
     base_url = self.build_url('')
     password_manager = theUrlLib.HTTPPasswordMgrWithDefaultRealm()
-    password_manager.add_password(None, base_url, self.username, self.password)
-    handlers = [HandlerClass(password_manager) for HandlerClass in AUTH_HANDLERS]
+    password_manager.add_password(realm=None, uri=base_url, user=self.username, passwd=self.password)
+    handlers = [HandlerClass(password_manager) for HandlerClass in self.AUTH_HANDLERS]
     self.opener = theUrlLib.build_opener(*handlers)
     if self.use_password_as_token:
         self.opener.addheaders.append(('Authorization', 'Bearer ' + self.password))
