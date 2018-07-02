@@ -513,21 +513,26 @@ run `python setup.py install`, or just copy the v1pysdk folder into your PYTHONP
 
 ## Revision History
 
-2018-06-28 v0.6.2 - Fix a critical memoization bug, error reponse printing, some HTTP/PUT calls.
+2018-07-02 v0.6.2 - Fix a critical memoization bug, error reponse printing, some HTTP/PUT calls, authentication error handling
 
-  A critical memoization bug caused by the python decorator being used prevents the same field of more than
+  A critical memoization bug caused by the decorator being used prevented the same field of more than
   one item of the same type from being updated in a single invocation of the Python intepreter; i.e. it's
   only possible to update the Title of one Story within a Python script, regardless of how many V1Meta objects
-  are created.
+  are created.  It also prevented the V1Meta objects from being created with separate credentials.
 
   Bug in how HTTP 400 responses were handled caused an exception to be thrown during handling and raising of
   an exception, preventing the actual error response provided with the HTTP 400 from being printed.
 
-  A bug in the creation of the HTTP/PUT commands in Python3 caused a TypeError exception to be thrown when no 
+  Bug in how NTLM authentication was handled prevented the HTTP 401 authentication error from being raised and
+  handled so the errors would silently fail without the GET/POST command completing.
+
+  A bug in the creation of the HTTP POST commands in Python3 caused a TypeError exception to be thrown when no 
   data payload was needed.  This prevent Operations with no arguments from being used on V1 objects.
 
-  Unittests were added to ensure some Operations work properly, and this implicitly tests that memoization is
-  working as well.
+  Unittests were added to ensure some Operations work properly.  Connection tests to ensure bad credentials
+  result in an identifable failed connection were also added.  Tests specifically to ensure separation of
+  credentials between different V1Meta objects within the same tests produce different results, thereby
+  checking that memoization is working properly on a per-V1Meta object basis were also added.
 
 2018-06-21 v0.6.1 - Fix a new item creation bug and added unittests for creation
 
