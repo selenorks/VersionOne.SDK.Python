@@ -1,4 +1,5 @@
 from testtools import TestCase
+from testtools.assertions import assert_that
 from testtools.matchers import Equals
 from testtools.content import text_content
 
@@ -43,13 +44,13 @@ class TestV1Connection(TestCase):
                 password = PublicTestServerConnection.password,
                 )
         except Exception as e:
-            self.assertTrue(False, message="Error trying to create connection: " + str(e))
+            assert_that(False, Equals(True), message="Error trying to create connection: " + str(e))
 
         try:
             items = v1.Story.select('Name').page(size=1)
             items.first() #run the query
         except Exception as e:
-            self.assertTrue(False, message="Error running query from connection: " + str(e))
+            assert_that(False, Equals(True), message="Error running query from connection: " + str(e))
 
     def test_meta_connect_instance_and_address(self):
         v1 = None
@@ -65,13 +66,13 @@ class TestV1Connection(TestCase):
                 password = PublicTestServerConnection.password,
                 )
         except Exception as e:
-            self.assertTrue(False, message="Error trying to create connection: " + str(e))
+            assert_that(False, Equals(True), message="Error trying to create connection: " + str(e))
 
         try:
             items = v1.Story.select('Name').page(size=1)
             items.first() #run the query
         except Exception as e:
-            self.assertTrue(False, message="Error running query from connection: " + str(e))
+            assert_that(False, Equals(True), message="Error running query from connection: " + str(e))
 
     def test_meta_connect_instance_url_overrides_separate(self):
         v1 = None
@@ -91,13 +92,13 @@ class TestV1Connection(TestCase):
                 password = PublicTestServerConnection.password,
                 )
         except Exception as e:
-            self.assertTrue(False, message="Error trying to create connection: " + str(e))
+            assert_that(False, Equals(True), message="Error trying to create connection: " + str(e))
 
         try:
             items = v1.Story.select('Name').page(size=1)
             items.first() #run the query
         except Exception as e:
-            self.assertTrue(False, message="Error running query from connection: " + str(e))
+            assert_that(False, Equals(True), message="Error running query from connection: " + str(e))
 
     def test_meta_connect_oauth(self):
         v1 = None
@@ -112,13 +113,13 @@ class TestV1Connection(TestCase):
                 use_password_as_token=True,
                 )
         except Exception as e:
-            self.assertTrue(False, message="Error trying to create connection: " + str(e))
+            assert_that(False, Equals(True), message="Error trying to create connection: " + str(e))
 
         try:
             items = v1.Story.select('Name').page(size=1)
             items.first() #run the query
         except Exception as e:
-            self.assertTrue(False, message="Error running query from connection: " + str(e))
+            assert_that(False, Equals(True), message="Error running query from connection: " + str(e))
 
     def test_meta_connect_oauth_ignores_username(self):
         v1 = None
@@ -135,10 +136,10 @@ class TestV1Connection(TestCase):
                 use_password_as_token=True,
                 )
         except Exception as e:
-            self.assertTrue(False, message="Error trying to create connection: " + str(e))
+            assert_that(False, Equals(True), message="Error trying to create connection: " + str(e))
 
         try:
             items = v1.Story.select('Name').page(size=1)
             items.first() #run the query
         except Exception as e:
-            self.assertTrue(False, message="Error running query from connection: " + str(e))
+            assert_that(False, Equals(True), message="Error running query from connection: " + str(e))
