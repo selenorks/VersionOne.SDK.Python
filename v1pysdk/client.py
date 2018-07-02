@@ -35,6 +35,29 @@ except ImportError:
     logging.warn("Windows integrated authentication module (ntlm) not found.")
 else:
     NTLM_FOUND=True
+    class CustomHTTPNtlmAuthHandler(HTTPNtlmAuthHandler):
+	    # The following code was a recommended change to the existing.  However unittesting proves that it
+	    # and the existing obscure authentication failures.  There seems to be no actual reason to be doing
+	    # this unless there was a particular issue with the HTTPNtlmAuthHandler in some specific version of
+	    # urllib2 for Python2 that no longer exists.  Using the default handler provably works correctly
+	    pass
+        #""" A version of HTTPNtlmAuthHandler that handles errors (better).
+        #    The default version doesn't use `self.parent.open` in it's
+        #    error handler, and completely bypasses the normal `OpenerDirector`
+        #    call chain, most importantly `HTTPErrorProcessor.http_response`,
+        #    which normally raises an error for 'bad' http status codes..
+        #"""
+        #def http_error_401(self, req, fp, code, msg, hdrs):
+        #    response = HTTPNtlmAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
+        #    if not (200 <= response.code < 300):
+        #        if response.code == 401:
+        #            raise HTTPError(req.get_full_url(), response.code, response.msg, response.info(), fp)
+        #        else:
+        #            response = self.parent.error(
+        #                'http', req, response, response.code, response.msg,
+        #                response.info())
+        #    return response
+
 
 class V1Error(Exception):
     pass
@@ -61,7 +84,7 @@ class V1Server(object):
       self.instance_url = self.build_url('')
     self.AUTH_HANDLERS = [HTTPBasicAuthHandler]
     if NTLM_FOUND:
-        self.AUTH_HANDLERS.append(HTTPNtlmAuthHandler)
+        self.AUTH_HANDLERS.append(CustomHTTPNtlmAuthHandler)
     modulelogname='v1pysdk.client'
     logname = "%s.%s" % (logparent, modulelogname) if logparent else None
     self.logger = logging.getLogger(logname)
