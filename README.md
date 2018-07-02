@@ -513,7 +513,7 @@ run `python setup.py install`, or just copy the v1pysdk folder into your PYTHONP
 
 ## Revision History
 
-2018-06-28 v0.6.2 - Fix a critical memoization bug.  Fix a bug in error reponse printing.
+2018-06-28 v0.6.2 - Fix a critical memoization bug, error reponse printing, some HTTP/PUT calls.
 
   A critical memoization bug caused by the python decorator being used prevents the same field of more than
   one item of the same type from being updated in a single invocation of the Python intepreter; i.e. it's
@@ -522,6 +522,12 @@ run `python setup.py install`, or just copy the v1pysdk folder into your PYTHONP
 
   Bug in how HTTP 400 responses were handled caused an exception to be thrown during handling and raising of
   an exception, preventing the actual error response provided with the HTTP 400 from being printed.
+
+  A bug in the creation of the HTTP/PUT commands in Python3 caused a TypeError exception to be thrown when no 
+  data payload was needed.  This prevent Operations with no arguments from being used on V1 objects.
+
+  Unittests were added to ensure some Operations work properly, and this implicitly tests that memoization is
+  working as well.
 
 2018-06-21 v0.6.1 - Fix a new item creation bug and added unittests for creation
 
