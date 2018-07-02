@@ -1,7 +1,7 @@
-
 from testtools import TestCase
+from testtools.assertions import assert_that
 from testtools.content import text_content
-from testtools.matchers import GreaterThan, LessThan, Contains, StartsWith, EndsWith
+from testtools.matchers import GreaterThan, LessThan, Contains, StartsWith, EndsWith, Equals
 
 import v1pysdk
 from .common_test_server import PublicTestServerConnection
