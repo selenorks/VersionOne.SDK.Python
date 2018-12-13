@@ -209,7 +209,7 @@ class V1Server(object):
       #return self.get_xml(path) # old style, not history-aware
       return self.get_xml(path)
 
-    elif moment == 'every'
+    elif moment == 'every':
       path = "/rest-1.v1/Hist/{0}/{1}".format(asset_type_name, oid)
       return self.get_xml(path)
 

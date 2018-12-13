@@ -148,6 +148,7 @@ class TestV1Query(TestV1CommonSetup):
                         if 'Actuals.Value.@Sum' in t.data:
                             foundActuals=True
                             break
+                   # import pdb; pdb.set_trace()
             except:
                 exceptionReached=True
             else:

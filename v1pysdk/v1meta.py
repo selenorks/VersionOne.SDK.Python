@@ -193,7 +193,7 @@ class V1Meta(object):
       for value_element in related_asset_elements:
         relation_idref = value_element.get('idref')
         #value = self.asset_from_oid(relation_idref)
-        value = self.history_aware_asset_from_oid(relation_id_ref)
+        value = self.history_aware_asset_from_oid(relation_idref)
         rellist.append(value)
       self.add_relation_to_output(output, key, rellist)
 
@@ -270,7 +270,8 @@ class V1Meta(object):
       return instance
 
     else:
-      asset_from_oid(oidtoken)
+      # not really withmoment, should probably change the name
+      return self.asset_from_oid(oidtoken_with_moment)
       
     
   def set_attachment_blob(self, attachment, data=None):
