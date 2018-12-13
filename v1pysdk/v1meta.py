@@ -162,8 +162,8 @@ class V1Meta(object):
   def query(self, asset_type_name, wherestring, selstring):
     return self.server.get_query_xml(asset_type_name, wherestring, selstring)
     
-  def read_asset(self, asset_type_name, asset_oid):
-    xml = self.server.get_asset_xml(asset_type_name, asset_oid)
+  def read_asset(self, asset_type_name, asset_oid, asset_desired_moment='none'):
+    xml = self.server.get_asset_xml(asset_type_name, asset_oid, asset_desired_moment)
     return self.unpack_asset(xml)
     
   def unpack_asset(self, xml):
@@ -192,7 +192,8 @@ class V1Meta(object):
       rellist = []
       for value_element in related_asset_elements:
         relation_idref = value_element.get('idref')
-        value = self.asset_from_oid(relation_idref)
+        #value = self.asset_from_oid(relation_idref)
+        value = self.history_aware_asset_from_oid(relation_id_ref)
         rellist.append(value)
       self.add_relation_to_output(output, key, rellist)
 
@@ -258,6 +259,19 @@ class V1Meta(object):
     AssetClass = self.asset_class(asset_type)
     instance = AssetClass(asset_id)
     return instance
+
+  def history_aware_asset_from_oid(self, oidtoken_with_moment):
+    if len(oidtoken_with_moment.split(':')) == 3:
+      # means oid token has the form "X: Y: Z", which contains the moment as Z
+      asset_type, asset_id, asset_moment = oidtoken_with_moment.split(':')
+      # once you have the moment, make a query to : <version1-url>/rest-1.v1/Hist/<asset type>/<asset id>/""
+      AssetClass = self.asset_class(asset_type)
+      instance = AssetClass(asset_id)
+      return instance
+
+    else:
+      asset_from_oid(oidtoken)
+      
     
   def set_attachment_blob(self, attachment, data=None):
      intid = attachment.intid if isinstance(attachment, BaseAsset) else attachment
