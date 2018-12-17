@@ -494,22 +494,39 @@ with V1Meta(
 
 ## TODO
 
-  * Make things Moment-aware
+  - [ ] Make things Moment-aware
 
-  * Convert types between client and server (right now everything is a string)
+  - [ ] Convert types between client and server (right now everything is a string)
 
-  * Add debug logging
+  - [ ] Add debug logging
 
-  * Beef up test coverage
+  - [ ] Beef up test coverage
 
-  * Asset creation templates and creation "in context of" other asset
+  - [ ] Asset creation templates and creation "in context of" other asset
 
-  * Correctly handle multi-valued attributes including removal of values.
+  - [ ] Correctly handle multi-valued attributes including removal of values.
 
 ## Installation
 
 run `python setup.py install`, or just copy the v1pysdk folder into your PYTHONPATH.
 
+## Testing
+
+Run 
+```
+bash
+$ python setup.py test
+```
+
+from within your virtual environment. If all tests ran correctly, it will say:
+
+```
+----------------------------------------------------------------------
+Ran <X> tests in <Y> s
+
+OK
+
+```
 
 ## Revision History
 
