@@ -199,9 +199,26 @@ class V1Server(object):
         raise V1Error(exception)
     return document
 
-  def get_asset_xml(self, asset_type_name, oid):
-    path = '/rest-1.v1/Data/{0}/{1}'.format(asset_type_name, oid)
-    return self.get_xml(path)
+  def get_asset_xml(self, asset_type_name, oid, moment='none'):
+    """
+    Returns an array of asset xmls. possible moment values are:
+    'every' or 'none' or the specific moment
+    """
+    if moment == 'none':
+      path = '/rest-1.v1/Data/{0}/{1}'.format(asset_type_name, oid)
+      #return self.get_xml(path) # old style, not history-aware
+      return self.get_xml(path)
+
+    elif moment == 'every':
+      path = "/rest-1.v1/Hist/{0}/{1}".format(asset_type_name, oid)
+      return self.get_xml(path)
+
+    elif isinstance(moment, int):
+      path = "/rest-1.v1/Data/{0}/{1}/{2}".format(asset_type_name, oid, moment)
+      return self.get_xml(path)
+
+    else:
+      raise V1Error("Invalid moment passed for asset.")
 
   def get_query_xml(self, asset_type_name, where=None, sel=None):
     path = '/rest-1.v1/Data/{0}'.format(asset_type_name)
