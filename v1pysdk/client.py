@@ -70,7 +70,7 @@ class V1AssetNotFoundError(V1Error):
 class V1Server(object):
   "Accesses a V1 HTTP server as a client of the XML API protocol"
 
-  def __init__(self, address="localhost", instance="VersionOne.Web", username='', password='', scheme="https", instance_url=None, logparent=None, loglevel=logging.ERROR, use_password_as_token=False):
+  def __init__(self, address="localhost", instance="VersionOne.Web", username='', password='', scheme="https", instance_url=None, logparent=None, loglevel=logging.ERROR, use_password_as_token=False, use_oauth_path=False):
     if instance_url:
       self.instance_url = instance_url
       parsed = urlparse(instance_url)
@@ -93,6 +93,12 @@ class V1Server(object):
     self.password = password
     self.use_password_as_token = use_password_as_token
     self._install_opener()
+
+    # On-premise installations will not allow token based auth on usual path
+    if use_oauth_path is True:
+      self.rest_api_path = 'rest-1.oauth.v1'
+    else:
+      self.rest_api_path = 'rest-1.v1'
 
   def _install_opener(self):
     base_url = self.build_url('')
@@ -205,23 +211,23 @@ class V1Server(object):
     'every' or 'none' or the specific moment
     """
     if moment == 'none':
-      path = '/rest-1.v1/Data/{0}/{1}'.format(asset_type_name, oid)
+      path = '/{0}/Data/{1}/{2}'.format(self.rest_api_path, asset_type_name, oid)
       #return self.get_xml(path) # old style, not history-aware
       return self.get_xml(path)
 
     elif moment == 'every':
-      path = "/rest-1.v1/Hist/{0}/{1}".format(asset_type_name, oid)
+      path = "/{0}/Hist/{1}/{2}".format(self.rest_api_path, asset_type_name, oid)
       return self.get_xml(path)
 
     elif isinstance(moment, int):
-      path = "/rest-1.v1/Data/{0}/{1}/{2}".format(asset_type_name, oid, moment)
+      path = "/{0}/Data/{1}/{2}/{3}".format(self.rest_api_path, asset_type_name, oid, moment)
       return self.get_xml(path)
 
     else:
       raise V1Error("Invalid moment passed for asset.")
 
   def get_query_xml(self, asset_type_name, where=None, sel=None):
-    path = '/rest-1.v1/Data/{0}'.format(asset_type_name)
+    path = '/{0}/Data/{1}'.format(self.rest_api_path, asset_type_name)
     query = {}
     if where is not None:
         query['Where'] = where
@@ -234,12 +240,12 @@ class V1Server(object):
     return self.get_xml(path)
 
   def execute_operation(self, asset_type_name, oid, opname):
-    path = '/rest-1.v1/Data/{0}/{1}'.format(asset_type_name, oid)
+    path = '/{0}/Data/{1}/{2}'.format(self.rest_api_path, asset_type_name, oid)
     query = {'op': opname}
     return self.get_xml(path, query=query, postdata={})
 
   def get_attr(self, asset_type_name, oid, attrname):
-    path = '/rest-1.v1/Data/{0}/{1}/{2}'.format(asset_type_name, oid, attrname)
+    path = '/{0}/Data/{1}/{2}/{3}'.format(self.rest_api_path, asset_type_name, oid, attrname)
     return self.get_xml(path)
 
   def create_asset(self, asset_type_name, xmldata, context_oid=''):
@@ -247,12 +253,12 @@ class V1Server(object):
     query = {}
     if context_oid:
       query = {'ctx': context_oid}
-    path = '/rest-1.v1/Data/{0}'.format(asset_type_name)
+    path = '/{0}/Data/{1}'.format(self.rest_api_path, asset_type_name)
     return self.get_xml(path, query=query, postdata=body)
 
   def update_asset(self, asset_type_name, oid, update_doc):
     newdata = ElementTree.tostring(update_doc, encoding='utf-8')
-    path = '/rest-1.v1/Data/{0}/{1}'.format(asset_type_name, oid)
+    path = '/{0}/Data/{1}/{2}'.format(self.rest_api_path, asset_type_name, oid)
     return self.get_xml(path, postdata=newdata)
 
 
