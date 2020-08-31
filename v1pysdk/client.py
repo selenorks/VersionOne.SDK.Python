@@ -16,7 +16,7 @@ else:
     from urllib.error import HTTPError
     from urllib.parse import urlencode
     from urllib.parse import urlunparse, urlparse
-
+import urllib
 try:
     from xml.etree import ElementTree
     from xml.etree.ElementTree import Element
@@ -25,7 +25,8 @@ except ImportError:
     from elementtree.ElementTree import Element
 
 NTLM_FOUND=False
-
+import requests
+from requests_ntlm3 import HttpNtlmAuth
 try:
     if (sys.version_info < (3,0)):
         from ntlm.HTTPNtlmAuthHandler import HTTPNtlmAuthHandler
@@ -40,23 +41,48 @@ else:
 	    # and the existing obscure authentication failures.  There seems to be no actual reason to be doing
 	    # this unless there was a particular issue with the HTTPNtlmAuthHandler in some specific version of
 	    # urllib2 for Python2 that no longer exists.  Using the default handler provably works correctly
-	    pass
+	    # pass
         #""" A version of HTTPNtlmAuthHandler that handles errors (better).
         #    The default version doesn't use `self.parent.open` in it's
         #    error handler, and completely bypasses the normal `OpenerDirector`
         #    call chain, most importantly `HTTPErrorProcessor.http_response`,
         #    which normally raises an error for 'bad' http status codes..
         #"""
-        #def http_error_401(self, req, fp, code, msg, hdrs):
-        #    response = HTTPNtlmAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
-        #    if not (200 <= response.code < 300):
-        #        if response.code == 401:
-        #            raise HTTPError(req.get_full_url(), response.code, response.msg, response.info(), fp)
-        #        else:
-        #            response = self.parent.error(
-        #                'http', req, response, response.code, response.msg,
-        #                response.info())
-        #    return response
+        def http_error_401(self, req, fp, code, msg, hdrs):
+          import io
+          realm = None
+          user, pw = self.passwd.find_user_password(realm, req.get_full_url())
+
+          auth = HttpNtlmAuth(user, pw)
+          response = requests.get(req.get_full_url(), auth=auth)
+          # response.raw
+
+          def notimplemented():
+           raise NotImplementedError
+
+
+          response.s = io.StringIO(response.text)
+          # response.open = response.s.open
+          response.close = response.s.close
+          response.read = response.s.read
+          response.readline = notimplemented
+
+          infourl = urllib.response.addinfourl(response, response.headers, req.get_full_url())
+          infourl.code = response.status_code
+          infourl.msg = response.reason
+          return infourl
+
+          response = HTTPNtlmAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
+          if response is None:
+           return response
+          if not (200 <= response.code < 300):
+             if response.code == 401:
+                 raise HTTPError(req.get_full_url(), response.code, response.msg, response.info(), fp)
+             else:
+                 response = self.parent.error(
+                     'http', req, response, response.code, response.msg,
+                     response.info())
+          return response
 
 
 class V1Error(Exception):
@@ -82,7 +108,7 @@ class V1Server(object):
       self.instance = instance.strip('/')
       self.scheme = scheme
       self.instance_url = self.build_url('')
-    self.AUTH_HANDLERS = [HTTPBasicAuthHandler]
+    self.AUTH_HANDLERS = [] #[HTTPBasicAuthHandler]
     if NTLM_FOUND:
         self.AUTH_HANDLERS.append(CustomHTTPNtlmAuthHandler)
     modulelogname='v1pysdk.client'
